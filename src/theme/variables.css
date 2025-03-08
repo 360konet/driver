@@ -1,2 +1,40 @@
 /* For information on how to create your own theme, please see:
 http://ionicframework.com/docs/theming/ */
+
+
+:root {
+    /* Primary color (Red) */
+    --ion-color-primary: #e60000;
+    --ion-color-primary-rgb: 230, 0, 0;
+    --ion-color-primary-contrast: #ffffff;
+    --ion-color-primary-contrast-rgb: 255, 255, 255;
+    --ion-color-primary-shade: #cc0000;
+    --ion-color-primary-tint: #ff1a1a;
+  
+    /* Secondary color (White) */
+    --ion-color-secondary: #ffffff;
+    --ion-color-secondary-rgb: 255, 255, 255;
+    --ion-color-secondary-contrast: #e60000;
+    --ion-color-secondary-contrast-rgb: 230, 0, 0;
+    --ion-color-secondary-shade: #f2f2f2;
+    --ion-color-secondary-tint: #ffffff;
+  
+    /* Background and Text Colors */
+    --ion-background-color: #ffffff;
+    --ion-background-color-rgb: 255, 255, 255;
+    --ion-text-color: #000000;
+    --ion-text-color-rgb: 0, 0, 0;
+  
+    /* Toolbar and Card Styling */
+    --ion-toolbar-background: #ffffff;
+    --ion-toolbar-color: #000000;
+    --ion-card-background: #ffffff;
+    --ion-card-color: #000000;
+  }
+  
+  /* Ensure app always stays in light mode */
+  body {
+    --ion-background-color: #ffffff !important;
+    --ion-text-color: #000000 !important;
+  }
+  
