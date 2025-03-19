@@ -18,6 +18,7 @@
               label-placement="floating"
               fill="outline"
               placeholder="Enter phone number"
+              v-model="phone"
               class="input-field"
             ></ion-input>
             <ion-input
@@ -25,11 +26,17 @@
               label="Password"
               label-placement="floating"
               fill="outline"
+              v-model="password"
               placeholder="Enter password"
               class="input-field"
             ></ion-input>
 
-            <ion-button expand="block" @click="navigateToHome" class="login-btn">Login</ion-button>
+            
+            <ion-button expand="block" @click="handleLogin" class="login-btn" :disabled="loading">
+                {{ loading ? 'Loging in...' : 'Login' }}
+              </ion-button>
+              
+              <ion-label v-if="errorMessage" class="error-message">{{ errorMessage }}</ion-label>
 
             <ion-label class="register-label" @click="navigateToRegister">
               Don't have an account? <span class="register-link">Register Now</span>
@@ -64,19 +71,36 @@
 import { IonPage, IonCard, IonInput, IonButton, IonCardHeader, IonLabel, IonCardTitle, IonCardSubtitle, IonCardContent, IonContent, IonModal } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
+import axios from 'axios'; // ✅ Import axios
+import { loginUser } from '@/services/api';
 
 const router = useRouter();
 const showCustomerCare = ref(false);
 const chatMessages = ref<{ text: string; sent: boolean }[]>([]);
 const newMessage = ref('');
+const phone = ref('');
+const password = ref('');
+const loading = ref(false);
+const errorMessage = ref('');
 
 function navigateToRegister() {
   router.push('/register');
 }
 
-function navigateToHome() {
-  router.push('/tabs/tab1');
-}
+const handleLogin = async () => {
+  loading.value = true;
+  errorMessage.value = '';
+
+  try {
+    const userData = {  phone: phone.value, password: password.value };
+    await loginUser(userData);
+    router.push('/tabs/tab1'); // Redirect to login after successful registration
+  } catch (error: any) {
+    errorMessage.value = error.message || 'Login went wrong!';
+  } finally {
+    loading.value = false;
+  }
+};
 
 function openCustomerCare() {
   showCustomerCare.value = true;
@@ -89,6 +113,7 @@ function sendMessage() {
   }
 }
 </script>
+
 
 <style scoped>
 /* Background and Centered Container */

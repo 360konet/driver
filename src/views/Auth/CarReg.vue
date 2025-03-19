@@ -21,6 +21,8 @@
   
               <!-- Car Fields -->
               <div v-if="vehicleType === 'car'">
+                <ion-input label="Valid Driver's Liencense" label-placement="floating" fill="outline" placeholder="Eg. VA123" v-model="car.license"></ion-input>
+                <ion-input label="Valid Ghana Card" label-placement="floating" fill="outline" placeholder="GH-123" v-model="car.ghana_card"></ion-input>
                 <ion-input label="Car Brand" label-placement="floating" fill="outline" placeholder="Eg. Toyota" v-model="car.brand"></ion-input>
                 <ion-input label="Model" label-placement="floating" fill="outline" placeholder="Eg. Corolla" v-model="car.model"></ion-input>
                 <ion-input label="Year" label-placement="floating" type="number" fill="outline" placeholder="Eg. 2023" v-model="car.year"></ion-input>
@@ -29,13 +31,15 @@
   
               <!-- Motorcycle Fields -->
               <div v-if="vehicleType === 'motor'">
-                <ion-input label="Motorcycle Brand" label-placement="floating" fill="outline" placeholder="Eg. Yamaha" v-model="motor.brand"></ion-input>
-                <ion-input label="Model" label-placement="floating" fill="outline" placeholder="Eg. R15" v-model="motor.model"></ion-input>
-                <ion-input label="Year" label-placement="floating" type="number" fill="outline" placeholder="Eg. 2023" v-model="motor.year"></ion-input>
-                <ion-input label="License Plate" label-placement="floating" fill="outline" placeholder="Eg. M-1234-22" v-model="motor.plate"></ion-input>
+                <ion-input label="Valid Driver's License" v-model="motor.license"></ion-input>
+                <ion-input label="Valid Ghana Card" v-model="motor.ghana_card"></ion-input>
+                <ion-input label="Motor Brand" v-model="motor.brand"></ion-input>
+                <ion-input label="Model" v-model="motor.model"></ion-input>
+                <ion-input label="Year" type="number" v-model="motor.year"></ion-input>
+                <ion-input label="License Plate" v-model="motor.plate"></ion-input>
               </div>
   
-              <ion-button expand="block" @click="registerVehicle" class="login-btn">Register</ion-button>
+              <ion-button expand="block" @click="registerVehicle" class="login-btn">Finish</ion-button>
             </ion-card-content>
           </ion-card>
         </div>
@@ -47,24 +51,46 @@
   import { ref } from 'vue';
   import { IonPage, IonCard, IonInput, IonButton, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonContent, IonSegment, IonSegmentButton } from '@ionic/vue';
   import { useRouter } from 'vue-router';
+  import { registerCarMotor } from '@/services/api';
 
   const vehicleType = ref('car'); // Default selection
-  const car = ref({ brand: '', model: '', year: '', plate: '' });
-  const motor = ref({ brand: '', model: '', year: '', plate: '' });
-  const router = useRouter();
+const car = ref({ type: 'car', status: 'Pending', license: '', ghana_card: '', brand: '', model: '', year: '', plate: '' });
+const motor = ref({ type: 'motor', status: 'Pending', license: '', ghana_card: '', brand: '', model: '', year: '', plate: '' });
+const router = useRouter();
 
-  
-//   const registerVehicle = () => {
-//     if (vehicleType.value === 'car') {
-//       console.log('Registering Car:', car.value);
-//     } else {
-//       console.log('Registering Motorcycle:', motor.value);
-//     }
-//   };
+async function registerVehicle() {
+  try {
+    const vehicleData = vehicleType.value === 'car' ? car.value : motor.value;
 
-function registerVehicle() {
-    router.push('/tabs/tab3'); // Ensure '/register' route is defined in your router
+    // Get stored user ID and token
+    const userId = localStorage.getItem('userId');
+    const authToken = localStorage.getItem('authToken');
+
+    console.log('Retrieved userId:', userId);
+    console.log('Retrieved authToken:', authToken);
+
+    if (!userId || !authToken) {
+      alert('Authentication error: Please log in again.');
+      router.push('/login');
+      return;
+    }
+
+    // Include userId in the vehicle data
+    vehicleData.user_id = userId;
+
+    console.log('Final Vehicle Data:', JSON.stringify(vehicleData, null, 2));
+
+    // Send the request with the Authorization token
+    await registerCarMotor(vehicleData, authToken);
+    
+    alert('Vehicle registered successfully!');
+    router.push('/tabs/tab3');
+  } catch (error: any) {
+    console.error('Vehicle Registration Error:', error.response?.data || error.message);
+    alert(error.response?.data?.message || 'Registration failed. Please try again.');
   }
+}
+
 
   </script>
   
