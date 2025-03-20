@@ -6,8 +6,9 @@
         <div class="profile-image-container">
           <ion-img src="/img/logincover.jpg" class="profile-image" />
         </div>
-        <ion-label class="profile-name">{{ user.name }}</ion-label>
-        <p>{{ user.status }}</p>
+        <ion-label class="profile-name">{{ user.name || 'N/A' }}</ion-label>
+        <p>{{ user.status || 'N/A' }}</p>
+        <p :style="getStatusStyle(vehicle.status)">{{ vehicle.status || 'N/A' }}</p>
       </div>
 
       <!-- Profile Details -->
@@ -16,12 +17,12 @@
           <ion-item class="transparent-item no-background">
             <ion-icon slot="start" :icon="phonePortraitOutline" />
             <ion-label>Phone</ion-label>
-            <ion-note slot="end">{{ user.phone }}</ion-note>
+            <ion-note slot="end">{{ user.phone || 'N/A' }}</ion-note>
           </ion-item>
           <ion-item class="transparent-item no-background">
             <ion-icon slot="start" :icon="mailOpenOutline" />
             <ion-label>Email</ion-label>
-            <ion-note slot="end">{{ user.email }}</ion-note>
+            <ion-note slot="end">{{ user.email || 'N/A' }}</ion-note>
           </ion-item>
           <ion-item class="transparent-item no-background">
             <ion-icon slot="start" :icon="locateOutline" />
@@ -31,7 +32,7 @@
           <ion-item class="transparent-item no-background">
             <ion-icon slot="start" :icon="timeOutline" />
             <ion-label>Created At</ion-label>
-            <ion-note slot="end">{{ user.created_at }}</ion-note>
+            <ion-note slot="end">{{ formatDate(user.created_at) || 'N/A' }}</ion-note>
           </ion-item>
         </ion-list>
         <ion-button expand="block" class="red-button">Edit Profile</ion-button>
@@ -117,6 +118,8 @@ import {
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { authAxios } from '@/services/api';
+
 
 // State for user and vehicle
 const user = ref({});
@@ -124,7 +127,48 @@ const vehicle = ref({});
 
 const router = useRouter();
 
-// Fetch user and vehicle details
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(date);
+};
+
+const getStatusStyle = (status) => {
+  let backgroundColor = "gray"; // Default color
+
+  switch (status?.toLowerCase()) {
+    case "pending":
+    case "banned":
+      backgroundColor = "red";
+      break;
+    case "verified":
+      backgroundColor = "green";
+      break;
+    case "warning":
+      backgroundColor = "yellow";
+      break;
+  }
+
+  return {
+    backgroundColor,
+    color: backgroundColor === "yellow" ? "black" : "white",
+    padding: "5px",
+    borderRadius: "5px",
+    textAlign: "center",
+    fontWeight: "bold",
+  };
+};
+
+
+
 const fetchProfile = async () => {
   try {
     const userId = localStorage.getItem("user_id");
@@ -133,14 +177,19 @@ const fetchProfile = async () => {
       return;
     }
 
-    const response = await axios.get(`http://127.0.0.1:8000/api/user/profile/${userId}`);
+    console.log("Fetching profile for User ID:", userId);
 
-    user.value = response.data.user;
-    vehicle.value = response.data.vehicle || {}; // If no vehicle, keep an empty object
+    const response = await authAxios.get(`/user/profile/${userId}`);
+
+    console.log("API Response:", response.data);
+
+    user.value = response.data.user || {};
+    vehicle.value = response.data.vehicle || {};
   } catch (error) {
-    console.error("Error fetching profile:", error);
+    console.error("Error fetching profile:", error.response?.data || error.message);
   }
 };
+
 
 
 // Logout function
