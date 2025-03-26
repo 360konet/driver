@@ -24,7 +24,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/Tab2Page.vue')
       },
       {
-        path: 'tab3',
+        path: 'tab3/:userId',
         component: () => import('@/views/Tab3Page.vue')
       }
     ]
@@ -39,7 +39,7 @@ const routes: Array<RouteRecordRaw> = [
     component:() =>import('@/views/Auth/Register.vue')
   },
   {
-    path: '/car/register',
+    path: '/car/register/:userId',
     component:() =>import('@/views/Auth/CarReg.vue')
   }
   

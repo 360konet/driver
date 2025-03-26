@@ -8,16 +8,21 @@ const API_URL = 'http://127.0.0.1:8000/api';
 export const registerUser = async (userData: any) => {
   try {
     const response = await axios.post(`${API_URL}/register`, userData);
-    const token = response.data.token; // Get the token from the response
+    const token = response.data.token;
+    const userId = response.data.user.id;
 
-    // Store the token in localStorage or Vuex/Pinia for later use
     localStorage.setItem('authToken', `Bearer ${token}`);
+    localStorage.setItem('user_id', userId);
+
+    // Redirect user to car registration first
+    window.location.href = `/car/register/${userId}`;
 
     return response.data;
   } catch (error: any) {
     throw error.response?.data || { message: 'Registration failed' };
   }
 };
+
 
 
 
@@ -30,10 +35,11 @@ export const authAxios = axios.create({
 authAxios.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
   if (token) {
-    config.headers.Authorization = token;
+    config.headers.Authorization = `Bearer ${token}`; // ✅ Ensure "Bearer" prefix is added here
   }
   return config;
 });
+
 
 
 
@@ -70,7 +76,7 @@ export const loginUser = async (credentials: { phone: string; password: string; 
     const token = response.data.token;
     const userId = response.data.user.id; // Get user ID
 
-    localStorage.setItem("authToken", `Bearer ${token}`);
+    localStorage.setItem("authToken", token); // ✅ Store token without "Bearer"
     localStorage.setItem("user_id", userId); // ✅ Store user_id
 
     return response.data;
@@ -78,6 +84,7 @@ export const loginUser = async (credentials: { phone: string; password: string; 
     throw error.response?.data || { message: "Login failed" };
   }
 };
+
 
 
 

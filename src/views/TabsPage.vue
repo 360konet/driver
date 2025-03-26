@@ -13,7 +13,7 @@
           <ion-label>Ride/Earnings</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="tab3" href="/tabs/tab3">
+        <ion-tab-button tab="tab3" :href="`/tabs/tab3/${userId}`">
           <ion-icon aria-hidden="true" :icon="personOutline" />
           <ion-label>Account</ion-label>
         </ion-tab-button>
@@ -25,6 +25,17 @@
 <script setup lang="ts">
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
 import { square, navigateOutline, personOutline, clipboardOutline } from 'ionicons/icons';
+import { useRoute } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+
+const route = useRoute();
+const userId = ref<string | null>(null);
+
+// Ensure userId is set
+onMounted(() => {
+  userId.value = route.params.userId as string || localStorage.getItem('user_id');
+});
+
 </script>
 
 <style scoped>

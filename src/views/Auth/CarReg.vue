@@ -54,9 +54,9 @@
   import { registerCarMotor } from '@/services/api';
 
   const vehicleType = ref('car'); // Default selection
-const car = ref({ type: 'car', status: 'Pending', license: '', ghana_card: '', brand: '', model: '', year: '', plate: '' });
-const motor = ref({ type: 'motor', status: 'Pending', license: '', ghana_card: '', brand: '', model: '', year: '', plate: '' });
-const router = useRouter();
+  const car = ref({ type: 'car', status: 'Pending', license: '', ghana_card: '', brand: '', model: '', year: '', plate: '' });
+  const motor = ref({ type: 'motor', status: 'Pending', license: '', ghana_card: '', brand: '', model: '', year: '', plate: '' });
+  const router = useRouter();
 
 async function registerVehicle() {
   try {
@@ -78,13 +78,13 @@ async function registerVehicle() {
     // Include userId in the vehicle data
     vehicleData.user_id = userId;
 
-    console.log('Final Vehicle Data:', JSON.stringify(vehicleData, null, 2));
+    console.log('Final Vehicle Data:', JSON.stringify(vehicleData ));
 
     // Send the request with the Authorization token
     await registerCarMotor(vehicleData, authToken);
     
     alert('Vehicle registered successfully!');
-    router.push('/tabs/tab3');
+    router.push(`/tabs/tab3/${userId}`);
   } catch (error: any) {
     console.error('Vehicle Registration Error:', error.response?.data || error.message);
     alert(error.response?.data?.message || 'Registration failed. Please try again.');

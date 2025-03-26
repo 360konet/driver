@@ -116,16 +116,17 @@ import {
   callOutline 
 } from "ionicons/icons";
 import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
 import axios from "axios";
 import { authAxios } from '@/services/api';
+import { userData } from '@/services/api';
+import { useRoute, useRouter } from "vue-router"; 
 
+const route = useRoute(); // Initialize route
 
 // State for user and vehicle
 const user = ref({});
 const vehicle = ref({});
-
-const router = useRouter();
+const userId = route.params.userId || localStorage.getItem('user_id');const router = useRouter();
 
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -169,26 +170,16 @@ const getStatusStyle = (status) => {
 
 
 
-const fetchProfile = async () => {
+const fetchUserData = async () => {
   try {
-    const userId = localStorage.getItem("user_id");
-    if (!userId) {
-      router.push("/login");
-      return;
-    }
-
-    console.log("Fetching profile for User ID:", userId);
-
     const response = await authAxios.get(`/user/profile/${userId}`);
-
-    console.log("API Response:", response.data);
-
-    user.value = response.data.user || {};
-    vehicle.value = response.data.vehicle || {};
+    user.value = response.data.user;
+    vehicle.value = response.data.vehicle || {}; // Ensure vehicle data is handled properly
   } catch (error) {
-    console.error("Error fetching profile:", error.response?.data || error.message);
+    console.error("Error fetching user and vehicle data:", error);
   }
 };
+
 
 
 
@@ -199,7 +190,8 @@ const logout = () => {
 };
 
 // Load profile data on component mount
-onMounted(fetchProfile);
+onMounted(fetchUserData);
+
 </script>
 
 <style scoped>
