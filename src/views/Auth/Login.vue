@@ -107,15 +107,17 @@ const handleLogin = async () => {
     if (response.user && response.user.id) {
       localStorage.setItem('userId', response.user.id); // Store user ID
       console.log("User ID:", response.user.id); // Log user ID to check
-    }
 
-    router.push('/tabs/tab1'); // Redirect after successful login
+      // Pass userId when navigating to tab1
+      router.push(`/tabs/tab1/${response.user.id}`);
+    }
   } catch (error: any) {
     errorMessage.value = error.message || 'Login went wrong!';
   } finally {
     loading.value = false;
   }
 };
+
 
 
 function openCustomerCare() {

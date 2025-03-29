@@ -16,7 +16,7 @@ const routes: Array<RouteRecordRaw> = [
         redirect: '/tabs/tab1'
       },
       {
-        path: 'tab1',
+        path: 'tab1/:userId',  // Update route to accept userId
         component: () => import('@/views/Tab1Page.vue')
       },
       {
