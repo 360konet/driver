@@ -31,7 +31,7 @@
             <ion-button @click="declineRide(ride.id)" color="danger">Decline</ion-button>
           </div>
           <div class="button-group" v-if="rideAccepted && !rideStarted">
-            <ion-button @click="startRide">Start Ride</ion-button>
+            <ion-button @click="startRide(ride.id)">Start Ride</ion-button>
           </div>
           <div class="button-group" v-if="rideStarted">
             <ion-button @click="completeRide(ride.id)" color="success">Complete Ride</ion-button>
@@ -170,18 +170,44 @@ const simulateIncomingRequest = () => {
 };
 
 
-const startRide = () => {
-  rideStarted.value = true;
-  const geocoder = new google.maps.Geocoder();
-  geocoder.geocode({ address: destination.value }, (results, status) => {
-    if (status === google.maps.GeocoderStatus.OK) {
-      const destinationCoords = results[0].geometry.location;
-      if (destinationMarker) destinationMarker.setMap(null);
-      destinationMarker = new google.maps.Marker({ position: destinationCoords, map, title: "Destination" });
-      drawRoute(pickupMarker.getPosition(), destinationCoords);
+const startRide = async (rideId) => {
+  try {
+    const token = localStorage.getItem("authToken");
+    const response = await axios.post(
+      `http://127.0.0.1:8000/api/driver/rides/${rideId}/start`,
+      { ride_start: new Date().toISOString() }, // Send current timestamp
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (response.data.success) {
+      rideStarted.value = true;
+
+      // Update UI status
+      const rideIndex = rideRequests.value.findIndex(r => r.id === rideId);
+      if (rideIndex !== -1) {
+        rideRequests.value[rideIndex].status = "In Progress";
+        rideRequests.value[rideIndex].ride_start = new Date().toISOString(); // Store locally
+      }
+
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ address: destination.value }, (results, status) => {
+        if (status === google.maps.GeocoderStatus.OK) {
+          const destinationCoords = results[0].geometry.location;
+          if (destinationMarker) destinationMarker.setMap(null);
+          destinationMarker = new google.maps.Marker({ position: destinationCoords, map, title: "Destination" });
+          drawRoute(pickupMarker.getPosition(), destinationCoords);
+        }
+      });
     }
-  });
+  } catch (error) {
+    console.error("Error starting ride:", error);
+  }
 };
+
 
 
 const completeRide = async (rideId) => {
