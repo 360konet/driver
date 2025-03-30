@@ -85,7 +85,7 @@
 
       <!-- Action Buttons -->
       <div class="action-buttons">
-        <ion-button expand="block" class="red-button" @click="logout">Log Out</ion-button>
+        <ion-button expand="block" class="red-button" @click="handleLogout">Log Out</ion-button>
       </div>
     </ion-content>
   </ion-page>
@@ -184,10 +184,33 @@ const fetchUserData = async () => {
 
 
 // Logout function
-const logout = () => {
-  localStorage.removeItem("authToken");
-  router.push("/login");
+const handleLogout = async () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    console.error("No authentication token found.");
+    router.push("/login");
+    return;
+  }
+
+  try {
+    await authAxios.post("/logout", {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("user_id");
+    router.push("/login");
+  } catch (error) {
+    console.error("Logout failed:", error.response?.data || error.message);
+  }
 };
+
+
+
+
 
 // Load profile data on component mount
 onMounted(fetchUserData);

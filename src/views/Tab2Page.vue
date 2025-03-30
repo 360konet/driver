@@ -11,21 +11,21 @@
       <!-- Earnings & Rides Overview -->
       <div class="overview-container">
         <div class="earnings-section">
-          <h3>Total Earnings: GHC 6823.00</h3>
+          <h3>Total Earnings: GHC {{ earnings.total }}</h3>
           <div class="earnings-row">
-            <p>Today:<br> GHC 1000</p>
-            <p>Week:<br> GHC 1000</p>
-            <p>Month:<br> GHC 1000</p>
-            <p>Year:<br> GHC 1000</p>
+            <p>Today:<br> GHC {{ earnings.today }}</p>
+            <p>Week:<br> GHC {{ earnings.week }}</p>
+            <p>Month:<br> GHC {{ earnings.month }}</p>
+            <p>Year:<br> GHC {{ earnings.year }}</p>
           </div>
         </div>
         <div class="rides-section">
-          <h3>Total Rides: 6757</h3>
+          <h3>Total Rides: {{ rides.total }}</h3>
           <div class="rides-row">
-            <p>Today: 13</p>
-            <p>Week: 28</p>
-            <p>Month: 56</p>
-            <p>Year: 654</p>
+            <p>Today: {{ rides.today }}</p>
+            <p>Week: {{ rides.week }}</p>
+            <p>Month: {{ rides.month }}</p>
+            <p>Year: {{ rides.year }}</p>
           </div>
         </div>
       </div>
@@ -39,9 +39,8 @@
           color="white"
         >
           <ion-label>
-            <h3>{{ ride.from }} to {{ ride.to }}</h3>
-            <p>{{ ride.date }} - {{ ride.time }}</p>
-            <p>GHC {{ ride.amount }}</p>
+            <h3>{{ ride.source }} to {{ ride.destination }}</h3>
+            <p>{{ ride.ride_end }} - GHC {{ ride.amount }}</p>
           </ion-label>
           <ion-button class="more-button" @click="openRideDetails(ride)">More</ion-button>
         </ion-item>
@@ -52,11 +51,10 @@
     <ion-modal :is-open="showModal" @didDismiss="showModal = false">
       <ion-content class="ion-padding">
         <h2>Ride Details</h2>
-        <p><strong>From:</strong> {{ selectedRide.from }}</p>
-        <p><strong>To:</strong> {{ selectedRide.to }}</p>
+        <p><strong>From:</strong> {{ selectedRide.source }}</p>
+        <p><strong>To:</strong> {{ selectedRide.destination }}</p>
         <p><strong>Amount:</strong> GHC {{ selectedRide.amount }}</p>
-        <p><strong>Date:</strong> {{ selectedRide.date }}</p>
-        <p><strong>Duration:</strong> {{ selectedRide.duration }}</p>
+        <p><strong>Date:</strong> {{ selectedRide.ride_end }}</p>
         <ion-button @click="showModal = false" expand="full">Close</ion-button>
       </ion-content>
     </ion-modal>
@@ -76,41 +74,51 @@ import {
   IonButton,
   IonModal,
 } from "@ionic/vue";
-import { ref } from "vue";
+import { useRoute } from "vue-router";
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
-type Ride = {
-  from: string;
-  to: string;
-  date: string;
-  time: string;
-  amount: number;
-  duration: string;
-};
+const route = useRoute();
+const driverId = route.params.userId || localStorage.getItem("driver_id");
 
 const showModal = ref(false);
-const selectedRide = ref<Ride>({
-  from: "",
-  to: "",
-  date: "",
-  time: "",
-  amount: 0,
-  duration: "",
-});
+const selectedRide = ref<any>({});
+const earnings = ref({ total: 0, today: 0, week: 0, month: 0, year: 0 });
+const rides = ref({ total: 0, today: 0, week: 0, month: 0, year: 0 });
+const rideHistory = ref<any[]>([]);
 
+const fetchEarningsAndRides = async () => {
+  if (!driverId) {
+    console.error("No driver ID found!");
+    return;
+  }
 
-const rideHistory = ref<Ride[]>([
-  { from: "Kumasi", to: "Accra", date: "20th Jan 2025", time: "10:30 AM", amount: 200, duration: "3 hours" },
-  { from: "Osu", to: "Nungua", date: "15th Jan 2025", time: "5:45 PM", amount: 150, duration: "45 mins" },
-  { from: "Tema", to: "Sakumono", date: "12th Jan 2025", time: "3:20 PM", amount: 100, duration: "30 mins" },
-  { from: "Burma Camp", to: "East Legon", date: "8th Jan 2025", time: "8:10 AM", amount: 250, duration: "1 hour" },
-  { from: "Tamale", to: "Kumasi", date: "5th Jan 2025", time: "6:30 PM", amount: 300, duration: "5 hours" }
-]);
+  try {
+    console.log(`Fetching data for driver ID: ${driverId}`);
 
-const openRideDetails = (ride: Ride) => {
+    const response = await axios.get(`http://127.0.0.1:8000/api/driver-earnings/${driverId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+
+    console.log("API Response:", response.data);
+
+    earnings.value = response.data.earnings || { total: 0, today: 0, week: 0, month: 0, year: 0 };
+    rides.value = response.data.rides || { total: 0, today: 0, week: 0, month: 0, year: 0 };
+    rideHistory.value = response.data.history || [];
+
+  } catch (error) {
+    console.error("Error fetching earnings:", error.response ? error.response.data : error.message);
+  }
+};
+
+onMounted(fetchEarningsAndRides);
+
+const openRideDetails = (ride: any) => {
   selectedRide.value = ride;
   showModal.value = true;
 };
 </script>
+
 
 <style scoped>
 /* Header Styling */

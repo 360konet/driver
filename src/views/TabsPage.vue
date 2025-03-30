@@ -3,16 +3,16 @@
     <ion-tabs>
       <ion-router-outlet></ion-router-outlet>
       <ion-tab-bar slot="bottom">
-        <ion-tab-button tab="tab1" href="/tabs/tab1">
+        <ion-tab-button tab="tab1" :href="`/tabs/tab1/${userId}`">
           <ion-icon aria-hidden="true" :icon="navigateOutline" />
           <ion-label>Request</ion-label>
         </ion-tab-button>
-
-        <ion-tab-button tab="tab2" href="/tabs/tab2">
+        
+        <ion-tab-button tab="tab2" :href="`/tabs/tab2/${userId}`">
           <ion-icon aria-hidden="true" :icon="clipboardOutline" />
           <ion-label>Ride/Earnings</ion-label>
         </ion-tab-button>
-
+        
         <ion-tab-button tab="tab3" :href="`/tabs/tab3/${userId}`">
           <ion-icon aria-hidden="true" :icon="personOutline" />
           <ion-label>Account</ion-label>

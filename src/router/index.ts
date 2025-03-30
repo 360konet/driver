@@ -16,11 +16,11 @@ const routes: Array<RouteRecordRaw> = [
         redirect: '/tabs/tab1'
       },
       {
-        path: 'tab1/:userId',  // Update route to accept userId
+        path: 'tab1/:userId',  // Ensure Tab1 receives userId
         component: () => import('@/views/Tab1Page.vue')
       },
       {
-        path: 'tab2',
+        path: 'tab2/:userId',  // Ensure Tab2 receives userId
         component: () => import('@/views/Tab2Page.vue')
       },
       {
@@ -29,6 +29,7 @@ const routes: Array<RouteRecordRaw> = [
       }
     ]
   },
+
   {
     path: '/login',
     component:() =>import('@/views/Auth/Login.vue')

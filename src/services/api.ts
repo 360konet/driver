@@ -110,13 +110,23 @@ export const userData = async (authToken: string) => {
   
   
 
-  export const logoutUser = async () => {
-    try {
-      await axios.post(`${API_URL}/logout`);
-      localStorage.removeItem('auth_token');
-    } catch (error) {
-      console.error('Logout failed', error);
-    }
-  };
+export const logoutUser = async () => {
+  try {
+    const token = localStorage.getItem("authToken"); // Get token from storage
+
+    await axios.post(`${API_URL}/logout`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    localStorage.removeItem("authToken"); // Clear token
+    localStorage.removeItem("user_id");
+
+  } catch (error) {
+    console.error("Logout failed", error);
+  }
+};
+
   
   
