@@ -30,12 +30,26 @@
             <ion-button @click="acceptRide(ride.id)">Accept</ion-button>
             <ion-button @click="declineRide(ride.id)" color="danger">Decline</ion-button>
           </div>
+          <!-- <div class="button-group" v-if="rideAccepted && !rideStarted">
+            <ion-button @click="startRide(ride.id)">Start Ride</ion-button>
+          </div> -->
           <div class="button-group" v-if="rideAccepted && !rideStarted">
             <ion-button @click="startRide(ride.id)">Start Ride</ion-button>
+            <ion-button @click="startChat(ride.rider)" color="medium">
+              <ion-icon :icon="chatbubbleOutline" slot="start" />
+              Chat
+            </ion-button>
+
+            <ion-button :href="`tel:${ride.rider.phone}`" color="tertiary">
+              <ion-icon :icon="callOutline" slot="start" />
+              Call
+            </ion-button>
           </div>
+
           <div class="button-group" v-if="rideStarted">
             <ion-button @click="completeRide(ride.id)" color="success">Complete Ride</ion-button>
           </div>
+
         </ion-card-content>
       </ion-card>
 
@@ -61,15 +75,15 @@ import {
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonButton, IonIcon, IonModal, alertController
 } from "@ionic/vue";
-import { notificationsOutline } from "ionicons/icons";
+import { notificationsOutline, callOutline, chatbubbleOutline } from "ionicons/icons"; // Import necessary icons
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 
 const route = useRoute();
 const driverId = ref(route.params.userId);
 const rideRequests = ref([]);
-
+const riderData = ref(null); 
 const pickupLocation = ref("Unknown");
 const destination = ref("Unknown");
 const fare = ref("0.00");
@@ -79,6 +93,30 @@ const rideCompleted = ref(false);
 const DriverequestVisible = ref(true);
 const showNotifications = ref(false);
 const notifications = ref(["New promo: Get 10% off your next ride!", "System update scheduled for midnight.", "Reminder: Safety first! Drive responsibly."]);
+
+const router = useRouter();
+
+const startChat = (rider) => {
+  if (rider && rider.id) {
+    const ride = rideRequests.value.find(r => r.rider.id === rider.id);
+    if (ride) {
+      router.push({ 
+        name: 'Chat', 
+        params: { 
+          driverId: driverId.value,
+          rideId: ride.id 
+        } 
+      });
+    } else {
+      console.error('Ride not found for this rider.');
+    }
+  } else {
+    console.error('Invalid rider data:', rider);
+  }
+};
+
+
+
 
 let map, pickupMarker, destinationMarker, DriverMarker, directionsService, directionsRenderer;
 

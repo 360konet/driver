@@ -42,7 +42,13 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/car/register/:userId',
     component:() =>import('@/views/Auth/CarReg.vue')
+  },
+  {
+    path: '/chat/:driverId/:rideId',
+    component: () => import('@/views/Chat.vue'),
+    name: 'Chat'
   }
+  
   
 ]
 
