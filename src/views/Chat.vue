@@ -6,7 +6,7 @@
             <ion-back-button @click="goBack" />
           </ion-buttons>
           <ion-title color="primary">
-            Chat with {{ driverName }}
+            Chat
           </ion-title>
         </ion-toolbar>
       </ion-header>

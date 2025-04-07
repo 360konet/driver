@@ -26,13 +26,14 @@
           <p>Destination: {{ ride.destination }}</p>
           <p>Rider: {{ ride.rider.name }}</p>
           <p>Fare: GHS {{ ride.fare || "0.00" }}</p>
-          <div class="button-group" v-if="!rideAccepted">
+
+          <!-- Only show Accept and Decline buttons if the ride is not completed -->
+          <div class="button-group" v-if="ride.status !== 'Completed' && !rideAccepted">
             <ion-button @click="acceptRide(ride.id)">Accept</ion-button>
             <ion-button @click="declineRide(ride.id)" color="danger">Decline</ion-button>
           </div>
-          <!-- <div class="button-group" v-if="rideAccepted && !rideStarted">
-            <ion-button @click="startRide(ride.id)">Start Ride</ion-button>
-          </div> -->
+
+          <!-- Show Start Ride button if the ride is accepted and not started yet -->
           <div class="button-group" v-if="rideAccepted && !rideStarted">
             <ion-button @click="startRide(ride.id)">Start Ride</ion-button>
             <ion-button @click="startChat(ride.rider)" color="medium">
@@ -46,21 +47,19 @@
             </ion-button>
           </div>
 
+          <!-- Show Complete Ride button if the ride has started -->
           <div class="button-group" v-if="rideStarted">
             <ion-button @click="completeRide(ride.id)" color="success">Complete Ride</ion-button>
           </div>
-
         </ion-card-content>
       </ion-card>
 
-
+      <!-- Notifications Modal -->
       <ion-modal :is-open="showNotifications" @didDismiss="showNotifications = false">
         <ion-content class="ion-padding">
           <h2>Notifications</h2>
-          <div class="notification-list">
-            <div v-for="(notification, index) in notifications" :key="index" class="notification-item">
-              {{ notification }}
-            </div>
+          <div v-for="(notification, index) in notifications" :key="index" class="notification-item">
+            {{ notification }}
           </div>
           <ion-button expand="full" @click="showNotifications = false">Close</ion-button>
         </ion-content>
@@ -68,6 +67,7 @@
     </ion-content>
   </ion-page>
 </template>
+
 
 <script setup>
 import {
@@ -79,6 +79,11 @@ import { notificationsOutline, callOutline, chatbubbleOutline } from "ionicons/i
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
+const previousRideIds = ref([]);
+const notificationSound = new Audio('/sounds/alert.wav');
+notificationSound.volume = 0.8;
+notificationSound.muted = true; // Add this
+notificationSound.volume = 0.8;
 
 const route = useRoute();
 const driverId = ref(route.params.userId);
@@ -93,6 +98,11 @@ const rideCompleted = ref(false);
 const DriverequestVisible = ref(true);
 const showNotifications = ref(false);
 const notifications = ref(["New promo: Get 10% off your next ride!", "System update scheduled for midnight.", "Reminder: Safety first! Drive responsibly."]);
+
+const unmuteSound = () => {
+  notificationSound.muted = false;
+};
+
 
 const router = useRouter();
 
@@ -120,25 +130,44 @@ const startChat = (rider) => {
 
 let map, pickupMarker, destinationMarker, DriverMarker, directionsService, directionsRenderer;
 
+const fetchDriverName = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/new-ride-request/${driverId.value}`);
+    driverData.value = response.data.driver;
+    driverName.value = response.data.driver.name;
+  } catch (error) {
+    console.error("Error fetching driver name:", error);
+    driverData.value = null;
+    driverName.value = "";
+  }
+};
+
+
 const fetchRides = async () => {
   try {
-    const token = localStorage.getItem("authToken"); // Retrieve token
-    const response = await axios.get(`http://127.0.0.1:8000/api/driver/rides/${driverId.value}`,
-      {
+    const token = localStorage.getItem("authToken");
+    const response = await axios.get(`http://127.0.0.1:8000/api/driver/rides/${driverId.value}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
     });
 
     if (response.data.length > 0) {
+      const newRideIds = response.data.map(r => r.id);
+
+      const hasNewRide = newRideIds.some(id => !previousRideIds.value.includes(id));
+      if (hasNewRide) {
+        notificationSound.play().catch(e => console.warn("Auto-play blocked:", e));
+      }
+
+      previousRideIds.value = newRideIds;
       rideRequests.value = response.data;
-    } else {
-      console.log("No ride requests available.");
     }
   } catch (error) {
     console.error("Error fetching rides:", error);
   }
 };
+
 
 const acceptRide = async (rideId) => {
   try {
@@ -179,11 +208,24 @@ const acceptRide = async (rideId) => {
   }
 };
 
+const playBeep = () => {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = ctx.createOscillator();
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(440, ctx.currentTime);
+  oscillator.connect(ctx.destination);
+  oscillator.start();
+  oscillator.stop(ctx.currentTime + 0.2);
+};
+
+
 
 onMounted(() => {
   initMap();
   simulateIncomingRequest();
   fetchRides();
+  setInterval(fetchRides, 3000); // auto-refresh every 3 seconds
+
 });
 
 const initMap = () => {
@@ -276,16 +318,15 @@ const completeRide = async (rideId) => {
       });
       await alert.present();
 
-      // Update UI status
-      const rideIndex = rideRequests.value.findIndex(r => r.id === rideId);
-      if (rideIndex !== -1) {
-        rideRequests.value[rideIndex].status = "Completed";
-      }
+      // Remove the completed ride from the list
+      rideRequests.value = rideRequests.value.filter(ride => ride.id !== rideId);
+
     }
   } catch (error) {
     console.error("Error completing ride:", error);
   }
 };
+
 
 
 const drawRoute = (origin, destination) => {
