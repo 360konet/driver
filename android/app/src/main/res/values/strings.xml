@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DriverApp</string>
+    <string name="title_activity_main">DriverApp</string>
+    <string name="package_name">com.example.driverapp</string>
+    <string name="custom_url_scheme">com.example.driverapp</string>
+</resources>

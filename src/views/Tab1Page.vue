@@ -146,7 +146,7 @@ const fetchDriverName = async () => {
 const fetchRides = async () => {
   try {
     const token = localStorage.getItem("authToken");
-    const response = await axios.get(`http://127.0.0.1:8000/api/driver/rides/${driverId.value}`, {
+    const response = await axios.get(`https://dririd.nxtremeprojectnew.com/api/driver/rides/${driverId.value}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -172,7 +172,7 @@ const fetchRides = async () => {
 const acceptRide = async (rideId) => {
   try {
     const token = localStorage.getItem("authToken");
-    const response = await axios.post(`http://127.0.0.1:8000/api/driver/rides/${rideId}/accept`, {}, {
+    const response = await axios.post(`https://dririd.nxtremeprojectnew.com/api/driver/rides/${rideId}/accept`, {}, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -254,7 +254,7 @@ const startRide = async (rideId) => {
   try {
     const token = localStorage.getItem("authToken");
     const response = await axios.post(
-      `http://127.0.0.1:8000/api/driver/rides/${rideId}/start`,
+      `https://dririd.nxtremeprojectnew.com/api/driver/rides/${rideId}/start`,
       { ride_start: new Date().toISOString() }, // Send current timestamp
       {
         headers: {
@@ -294,7 +294,7 @@ const completeRide = async (rideId) => {
   try {
     const token = localStorage.getItem("authToken");
     const response = await axios.post(
-      `http://127.0.0.1:8000/api/driver/rides/${rideId}/complete`, 
+      `https://dririd.nxtremeprojectnew.com/api/driver/rides/${rideId}/complete`, 
       {}, 
       {
         headers: {

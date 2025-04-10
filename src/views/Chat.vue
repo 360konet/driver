@@ -66,7 +66,7 @@
   // Fetch driver data (assuming API call or data availability)
   const fetchDriverName = async () => {
   try {
-    const response = await axios.get(`http://127.0.0.1:8000/api/drivers/${driverId.value}`);
+    const response = await axios.get(`https://dririd.nxtremeprojectnew.com/api/drivers/${driverId.value}`);
     driverName.value = response.data.name;  // Assuming the response has 'name' field
     localStorage.setItem('driverId', response.data.id); // ✅ Safely set it after response is received
   } catch (error) {
@@ -93,7 +93,7 @@
 
 
     try {
-      await axios.post('http://127.0.0.1:8000/api/chat', messageData);
+      await axios.post('https://dririd.nxtremeprojectnew.com/api/chat', messageData);
       messages.value.push({ text: newMessage.value, sent: true });
       newMessage.value = '';
 
@@ -110,7 +110,7 @@
   // Fetch new messages for the rider and driver
   const fetchMessages = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/get-chat', {
+      const response = await axios.get('https://dririd.nxtremeprojectnew.com/api/get-chat', {
         params: {
           user_id: riderId.value,
           driver_id: driverId.value,

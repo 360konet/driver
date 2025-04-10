@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-//const API_URL = 'http://192.168.43.195:8000/api';
-const API_URL = 'http://127.0.0.1:8000/api';
-
+//const API_URL = 'https://dririd.nxtremeprojectnew.com/api';
+const API_URL = 'https://dririd.nxtremeprojectnew.com/api';
 
 
 export const registerUser = async (userData: any) => {

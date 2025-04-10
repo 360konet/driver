@@ -96,7 +96,7 @@ const fetchEarningsAndRides = async () => {
   try {
     console.log(`Fetching data for driver ID: ${driverId}`);
 
-    const response = await axios.get(`http://127.0.0.1:8000/api/driver-earnings/${driverId}`, {
+    const response = await axios.get(`https://dririd.nxtremeprojectnew.com/api/driver-earnings/${driverId}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
 

@@ -14,7 +14,7 @@
   "dependencies": {
     "@capacitor/android": "7.0.1",
     "@capacitor/app": "7.0.0",
-    "@capacitor/core": "7.0.1",
+    "@capacitor/core": "^7.0.1",
     "@capacitor/geolocation": "^7.1.1",
     "@capacitor/haptics": "7.0.0",
     "@capacitor/ios": "7.0.1",
@@ -28,7 +28,7 @@
     "vue-router": "^4.2.0"
   },
   "devDependencies": {
-    "@capacitor/cli": "7.0.1",
+    "@capacitor/cli": "^7.0.1",
     "@types/axios": "^0.9.36",
     "@vitejs/plugin-legacy": "^5.0.0",
     "@vitejs/plugin-vue": "^4.0.0",
