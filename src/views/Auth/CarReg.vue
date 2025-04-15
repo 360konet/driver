@@ -54,8 +54,8 @@
   import { registerCarMotor } from '@/services/api';
 
   const vehicleType = ref('car'); // Default selection
-  const car = ref({ type: 'car', status: 'Pending', license: '', ghana_card: '', brand: '', model: '', year: '', plate: '' });
-  const motor = ref({ type: 'motor', status: 'Pending', license: '', ghana_card: '', brand: '', model: '', year: '', plate: '' });
+  const car = ref({ type: 'car', status: 'Pending', license: '', ghana_card: '', brand: '', model: '', year: '', plate: '', user_id: '' });
+  const motor = ref({ type: 'motor', status: 'Pending', license: '', ghana_card: '', brand: '', model: '', year: '', plate: '',   user_id: '' });
   const router = useRouter();
 
 async function registerVehicle() {

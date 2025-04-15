@@ -73,7 +73,7 @@
 
     if (response.token) {
       localStorage.setItem('authToken', response.token); // Store token
-      localStorage.setItem('userId', response.user.id); // Store user ID
+      localStorage.setItem('userId', response.user.id.toString());
     }
 
     router.push('/car/register'); // Redirect to car registration

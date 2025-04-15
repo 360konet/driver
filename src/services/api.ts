@@ -1,54 +1,62 @@
+// api.ts
 import axios from 'axios';
 
-//const API_URL = 'https://dririd.nxtremeprojectnew.com/api';
+// === API Base URL ===
 const API_URL = 'https://dririd.nxtremeprojectnew.com/api';
 
+// === Types ===
+export interface User {
+  id: number;
+  name: string;
+  phone: string;
+  email?: string;
+  // Extend if more fields are needed
+}
 
-export const registerUser = async (userData: any) => {
+export interface AuthResponse {
+  token: string;
+  user: User;
+}
+
+export interface ErrorResponse {
+  message: string;
+  [key: string]: any;
+}
+
+// === Register User ===
+export const registerUser = async (userData: any): Promise<AuthResponse> => {
   try {
-    const response = await axios.post(`${API_URL}/register`, userData);
-    const token = response.data.token;
-    const userId = response.data.user.id;
+    const response = await axios.post<AuthResponse>(`${API_URL}/register`, userData);
+    const { token, user } = response.data;
 
     localStorage.setItem('authToken', `Bearer ${token}`);
-    localStorage.setItem('user_id', userId);
+    localStorage.setItem('user_id', user.id.toString());
 
-    // Redirect user to car registration first
-    window.location.href = `/car/register/${userId}`;
-
+    window.location.href = `/car/register/${user.id}`;
     return response.data;
   } catch (error: any) {
-    throw error.response?.data || { message: 'Registration failed' };
+    throw (error.response?.data as ErrorResponse) || { message: 'Registration failed' };
   }
 };
 
-
-
-
-
+// === Authenticated Axios Instance ===
 export const authAxios = axios.create({
   baseURL: API_URL,
 });
 
-// Interceptor to set the Authorization header dynamically
 authAxios.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`; // ✅ Ensure "Bearer" prefix is added here
+    config.headers = config.headers || {}; // ✅ Prevent headers undefined error
+    config.headers.Authorization = token;
   }
   return config;
 });
 
-
-
-
-
-
-
-
-export const registerCarMotor = async (vehicleData: any, authToken: string) => {
+// === Register Car or Motor ===
+export const registerCarMotor = async (vehicleData: any, authToken: string): Promise<any> => {
   try {
-    const response = await axios.post(`${API_URL}/register/carmotor`, vehicleData, {
+    const response = await axios.post<any>(`${API_URL}/register/carmotor`, vehicleData, {
       headers: {
         'Authorization': `Bearer ${authToken}`,
         'Content-Type': 'application/json',
@@ -57,43 +65,32 @@ export const registerCarMotor = async (vehicleData: any, authToken: string) => {
     return response.data;
   } catch (error: any) {
     console.error("API Response Error:", error.response?.data);
-    throw error.response?.data || { message: 'Registration failed' };
+    throw (error.response?.data as ErrorResponse) || { message: 'Registration failed' };
   }
 };
 
-
-
-
-
-
-
-
-export const loginUser = async (credentials: { phone: string; password: string; app_type: string }) => {
+// === Login User ===
+export const loginUser = async (
+  credentials: { phone: string; password: string; app_type: string }
+): Promise<AuthResponse> => {
   try {
-    const response = await axios.post(`${API_URL}/login`, credentials);
+    const response = await axios.post<AuthResponse>(`${API_URL}/login`, credentials);
+    const { token, user } = response.data;
 
-    const token = response.data.token;
-    const userId = response.data.user.id; // Get user ID
-
-    localStorage.setItem("authToken", token); // ✅ Store token without "Bearer"
-    localStorage.setItem("user_id", userId); // ✅ Store user_id
+    localStorage.setItem("authToken", `Bearer ${token}`);
+    localStorage.setItem("user_id", user.id.toString());
 
     return response.data;
   } catch (error: any) {
-    throw error.response?.data || { message: "Login failed" };
+    throw (error.response?.data as ErrorResponse) || { message: "Login failed" };
   }
 };
 
-
-
-
-
-
-
-export const userData = async (authToken: string) => {
+// === Fetch Logged-in User's Data ===
+export const userData = async (authToken: string): Promise<User> => {
   try {
-    const userId = localStorage.getItem("user_id"); // Get stored user_id
-    const response = await axios.get(`${API_URL}/user/profile/${userId}`, {
+    const userId = localStorage.getItem("user_id");
+    const response = await axios.get<User>(`${API_URL}/user/profile/${userId}`, {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
@@ -101,31 +98,24 @@ export const userData = async (authToken: string) => {
     return response.data;
   } catch (error: any) {
     console.error("API Response Error:", error.response?.data);
-    throw error.response?.data || { message: "Fetching user data failed" };
+    throw (error.response?.data as ErrorResponse) || { message: "Fetching user data failed" };
   }
 };
 
-
-  
-  
-
-export const logoutUser = async () => {
+// === Logout User ===
+export const logoutUser = async (): Promise<void> => {
   try {
-    const token = localStorage.getItem("authToken"); // Get token from storage
+    const token = localStorage.getItem("authToken");
 
     await axios.post(`${API_URL}/logout`, {}, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: token,
       },
     });
 
-    localStorage.removeItem("authToken"); // Clear token
+    localStorage.removeItem("authToken");
     localStorage.removeItem("user_id");
-
   } catch (error) {
     console.error("Logout failed", error);
   }
 };
-
-  
-  

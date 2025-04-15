@@ -78,6 +78,31 @@ import { useRoute } from "vue-router";
 import { ref, onMounted } from "vue";
 import axios from "axios";
 
+interface EarningsResponse {
+  earnings: {
+    total: number;
+    today: number;
+    week: number;
+    month: number;
+    year: number;
+  };
+  rides: {
+    total: number;
+    today: number;
+    week: number;
+    month: number;
+    year: number;
+  };
+  history: Array<{
+    source: string;
+    destination: string;
+    amount: number;
+    ride_end: string;
+    [key: string]: any; // add more fields if needed
+  }>;
+}
+
+
 const route = useRoute();
 const driverId = route.params.userId || localStorage.getItem("driver_id");
 
@@ -96,9 +121,12 @@ const fetchEarningsAndRides = async () => {
   try {
     console.log(`Fetching data for driver ID: ${driverId}`);
 
-    const response = await axios.get(`https://dririd.nxtremeprojectnew.com/api/driver-earnings/${driverId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
+    const response = await axios.get<EarningsResponse>(
+      `https://dririd.nxtremeprojectnew.com/api/driver-earnings/${driverId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      }
+    );
+
 
     console.log("API Response:", response.data);
 
@@ -106,9 +134,10 @@ const fetchEarningsAndRides = async () => {
     rides.value = response.data.rides || { total: 0, today: 0, week: 0, month: 0, year: 0 };
     rideHistory.value = response.data.history || [];
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching earnings:", error.response ? error.response.data : error.message);
   }
+
 };
 
 onMounted(fetchEarningsAndRides);
